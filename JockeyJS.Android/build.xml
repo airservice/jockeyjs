@@ -74,6 +74,7 @@
         <delete dir="out" verbose="true"/>
         <delete dir="bin" verbose="true"/>
     </target>
+    
 
     <!-- Import the actual build file.
 
