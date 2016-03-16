@@ -1,3 +1,7 @@
+About this fork
+========
+Added `+ (void)on:(UIWebView*)webView event:(NSString*)type perform:(JockeyHandler)handler;`
+
 JockeyJS
 ========
 
@@ -350,5 +354,3 @@ Contributors
 
 * @tcoulter - original author (iOS only)
 * @paulpdaniels - Android support
-
-

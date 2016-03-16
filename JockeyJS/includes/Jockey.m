@@ -50,15 +50,25 @@
 
 + (void)on:(NSString*)type perform:(JockeyHandler)handler
 {
-    void (^ extended)(UIWebView *webView, NSDictionary *payload, void (^ complete)()) = ^(UIWebView *webView, NSDictionary *payload, void(^ complete)()) {
+	[self on:nil event:type perform:handler];
+}
+
++ (void)on:(UIWebView*)webView event:(NSString*)type perform:(JockeyHandler)handler
+{
+    void (^ extended)(NSDictionary *payload, void (^ complete)()) = ^(NSDictionary *payload, void(^ complete)()) {
         handler(payload);
         complete();
     };
     
-    [self on:type performAsync:extended];
+	[self on:webView event:type performAsync:extended];
 }
 
 + (void)on:(NSString *)type performAsync:(JockeyAsyncHandler)handler
+{
+	[self on:nil event:type performAsync:handler];
+}
+
++ (void)on:(UIWebView*)webView event:(NSString *)type performAsync:(JockeyAsyncHandler)handler
 {
     Jockey *instance = [Jockey sharedInstance];
     
@@ -71,8 +81,14 @@
         
         [instance.listeners setValue:listenerList forKey:type];
     }
-    
-    [listenerList addObject:handler];
+	
+	NSMutableDictionary* dict = [@{
+		@"handler": handler,
+    } mutableCopy];
+	if (webView)
+		dict[@"host"] = webView;
+	
+    [listenerList addObject:dict];
 }
 
 + (void)off:(NSString *)type {
@@ -99,7 +115,7 @@
     NSError *err;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:NSJSONWritingPrettyPrinted error:&err];
     NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    NSString *javascript = [NSString stringWithFormat:@"Jockey.trigger(\"%@\", %li, %@);", type, (long)[messageId integerValue], jsonString];
+    NSString *javascript = [NSString stringWithFormat:@"Jockey.trigger(\"%@\", %zi, %@);", type, [messageId integerValue], jsonString];
     
     [webView stringByEvaluatingJavaScriptFromString:javascript];
     
@@ -152,8 +168,12 @@
         }
     };
     
-    for (JockeyAsyncHandler handler in listenerList) {
-        handler(webView, payload, complete);
+    for (NSDictionary* dict in listenerList) {
+		JockeyAsyncHandler handler = dict[@"handler"];
+		UIWebView* host = dict[@"host"];
+		NSLog(@"xxx %@, %@", webView, host);
+		if (host == nil || host == webView)
+            handler(payload, complete);
     }
 }
 
