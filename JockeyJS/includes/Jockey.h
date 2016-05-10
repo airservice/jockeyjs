@@ -26,11 +26,10 @@
 #import <Foundation/Foundation.h>
 
 typedef void (^ JockeyHandler)(NSDictionary *payload);
-typedef void (^ JockeyAsyncHandler)(NSDictionary *payload, void (^complete)());
+typedef void (^ JockeyAsyncHandler)(UIWebView *webView, NSDictionary *payload, void (^complete)());
 
 @interface Jockey : NSObject
 
-+ (void)on:(UIWebView*)webView event:(NSString*)type perform:(JockeyHandler)handler;
 + (void)on:(NSString*)type perform:(JockeyHandler)handler;
 + (void)on:(NSString*)type performAsync:(JockeyAsyncHandler)handler;
 + (void)off:(NSString *)type;
